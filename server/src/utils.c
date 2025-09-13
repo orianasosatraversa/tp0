@@ -5,7 +5,7 @@ t_log* logger;
 int iniciar_servidor(void)
 {
 	// Quitar esta línea cuando hayamos terminado de implementar la funcion
-	assert(!"no implementado!");
+	// assert(!"no implementado!");
 
 	int socket_servidor;
 
@@ -20,9 +20,21 @@ int iniciar_servidor(void)
 
 	// Creamos el socket de escucha del servidor
 
+	socket_servidor = socket(servinfo->ai_family,
+								servinfo->ai_socktype,
+								servinfo->ai_protocol);
+
 	// Asociamos el socket a un puerto
 
+	int optval = 1;
+	setsockopt(socket_servidor, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
+
+	bind(socket_servidor, servinfo->ai_addr, servinfo->ai_addrlen);
+
 	// Escuchamos las conexiones entrantes
+
+	listen(socket_servidor, SOMAXCONN);
+
 
 	freeaddrinfo(servinfo);
 	log_trace(logger, "Listo para escuchar a mi cliente");
@@ -33,14 +45,21 @@ int iniciar_servidor(void)
 int esperar_cliente(int socket_servidor)
 {
 	// Quitar esta línea cuando hayamos terminado de implementar la funcion
-	assert(!"no implementado!");
+	//assert(!"no implementado!");
 
 	// Aceptamos un nuevo cliente
-	int socket_cliente;
-	log_info(logger, "Se conecto un cliente!");
+	int socket_cliente = accept(socket_servidor,NULL, NULL);
+
+	if (socket_cliente == -1) {
+        log_error(logger, "Error al aceptar cliente");
+        exit(4);
+    }
+
+    log_info(logger, "Se conecto un cliente correctamente");
 
 	return socket_cliente;
 }
+
 
 int recibir_operacion(int socket_cliente)
 {
